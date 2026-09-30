@@ -1,0 +1,3 @@
+../Core/Src/MPU_6050.c:10:6:MPU6050_init	40	static
+../Core/Src/MPU_6050.c:200:6:MPU6050_GetData	80	static
+../Core/Src/MPU_6050.c:395:6:MPU6050_Calibrate	96	static
