@@ -23,6 +23,7 @@ extern IWDG_HandleTypeDef hiwdg;
 uint8_t BECON[BECON_PACKET_SIZE];
 
 int16_t rx_rssi = 0;
+uint8_t heater_status = 0x00; // OFF
 
 extern volatile uint8_t TX_DONE;
 extern volatile uint8_t RX_DONE;
@@ -95,8 +96,10 @@ void GDM_Manager(void)
 
 
 	//batt voltage
+	//GDM.battery_voltage = batt_vol;
 
 	//heater status
+	GDM.heater_status = heater_status;
 
 	if(MPU_DATA.error_flag == 1)
 	{
@@ -107,9 +110,9 @@ void GDM_Manager(void)
 
 	else
 	{
-		GDM.pitch = (int16_t)(MPU_DATA.pitch * 100);
-		GDM.roll = (int16_t)(MPU_DATA.roll * 100);
-		GDM.yawrate = (int16_t)(MPU_DATA.yaw * 100);
+		GDM.pitch   = (int16_t)MPU_DATA.pitch;
+		GDM.roll   = (int16_t)MPU_DATA.roll;
+		GDM.yawrate = (int16_t)MPU_DATA.gyro_z;
 	}
 
 }
@@ -197,16 +200,21 @@ void Parse_Data(void)
 void Heater_Control(void)
 {
 	if(errr.ms5611_error == 1)
+	{
 		HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_SET);
+	    heater_status = 0x01;
+	}
 	else
 	{
 		if(current_baro_data.temperature < 20)
 		{
 			HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_SET);
+			heater_status = 0x01;
 		}
 		else if (current_baro_data.temperature > 30)
 		{
 			HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_RESET);
+			heater_status = 0x00;
 		}
 	}
 }

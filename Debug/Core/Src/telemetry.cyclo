@@ -1,7 +1,7 @@
-../Core/Src/telemetry.c:49:10:CRC16	4
-../Core/Src/telemetry.c:71:6:GDM_Manager	3
-../Core/Src/telemetry.c:118:6:Parse_Data	1
-../Core/Src/telemetry.c:197:6:Heater_Control	4
-../Core/Src/telemetry.c:215:6:TX_Becon	4
-../Core/Src/telemetry.c:247:6:JPEG_Image_Transmit	11
-../Core/Src/telemetry.c:359:6:RX_Handler	14
+../Core/Src/telemetry.c:50:10:CRC16	4
+../Core/Src/telemetry.c:72:6:GDM_Manager	3
+../Core/Src/telemetry.c:121:6:Parse_Data	1
+../Core/Src/telemetry.c:200:6:Heater_Control	4
+../Core/Src/telemetry.c:223:6:TX_Becon	4
+../Core/Src/telemetry.c:255:6:JPEG_Image_Transmit	11
+../Core/Src/telemetry.c:367:6:RX_Handler	14

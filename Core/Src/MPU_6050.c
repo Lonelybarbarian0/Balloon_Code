@@ -6,10 +6,203 @@
 #define ALPHA      0.96f       // Complementary filter weighting
 #define DT         0.01f       // 10 ms = 100 Hz
 
+uint16_t consecutive_failures = 0;
+
+
+//void MPU6050_init(I2C_HandleTypeDef *i2c,
+//                  Struct_MPU6050 *mpu6050_buf)
+//{
+//    /* Clear all buffers */
+//    mpu6050_buf->acc_x = 0.0f;
+//    mpu6050_buf->acc_y = 0.0f;
+//    mpu6050_buf->acc_z = 0.0f;
+//
+//    mpu6050_buf->gyro_x = 0.0f;
+//    mpu6050_buf->gyro_y = 0.0f;
+//    mpu6050_buf->gyro_z = 0.0f;
+//
+//    mpu6050_buf->roll = 0.0f;
+//    mpu6050_buf->pitch = 0.0f;
+//    mpu6050_buf->yaw = 0.0f;
+//
+//    mpu6050_buf->data_ready = 0;
+//    mpu6050_buf->error_flag = 0;
+//
+//    mpu6050_buf->acc_x_offset = 0.0f;
+//    mpu6050_buf->acc_y_offset = 0.0f;
+//    mpu6050_buf->acc_z_offset = 0.0f;
+//
+//    mpu6050_buf->gyro_x_offset = 0.0f;
+//    mpu6050_buf->gyro_y_offset = 0.0f;
+//    mpu6050_buf->gyro_z_offset = 0.0f;
+//
+//
+//    /* Check I2C communication / WHO_AM_I */
+//    uint8_t val = 0;
+//
+//    if (HAL_I2C_Mem_Read(i2c,
+//                         MPU6050_ADDR,
+//                         MPU6050_WHO_AM_I,
+//						 I2C_MEMADD_SIZE_8BIT,
+//                         &val,
+//                         1,
+//                         100) == HAL_OK)
+//    {
+//        if (val != 0x68)
+//        {
+//            mpu6050_buf->error_flag = 1;
+//            return;
+//        }
+//    }
+//    else
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//
+//    /* Power management
+//     *
+//     * 0x88:
+//     * - Temperature sensor disabled
+//     * - Internal 8 MHz oscillator temporarily selected
+//     */
+//    val = 0x88;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_PWR_MGMT_1,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* Select X-axis gyroscope PLL as clock source */
+//    val = 0x01;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_PWR_MGMT_1,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* Sample rate
+//     *
+//     * Gyroscope output rate = 1 kHz
+//     *
+//     * Sample Rate = 1000 / (1 + SMPLRT_DIV)
+//     *
+//     * SMPLRT_DIV = 9
+//     *
+//     * Sample rate = 100 Hz
+//     */
+//    val = 9;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_SMPRT_DIV,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* Digital Low Pass Filter
+//     *
+//     * CONFIG = 0x03
+//     *
+//     * Gyroscope bandwidth approximately 42 Hz
+//     * Accelerometer bandwidth approximately 44 Hz
+//     */
+//    val = 0x03;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_CONFIG,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* Accelerometer full-scale configuration */
+//    val = FS_SCALE_ACC;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_ACCEL_CONFIG,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* Gyroscope full-scale configuration */
+//    val = FS_SCALE_GYRO;
+//
+//    if (HAL_I2C_Mem_Write(i2c,
+//                          MPU6050_ADDR,
+//                          MPU6050_GYRO_CONFIG,
+//                          1,
+//                          &val,
+//                          1,
+//                          100) != HAL_OK)
+//    {
+//        mpu6050_buf->error_flag = 1;
+//        return;
+//    }
+//
+//    HAL_Delay(10);
+//
+//
+//    /* No interrupt configuration required.
+//     *
+//     * MPU6050 INT pin can be left unconnected.
+//     */
+//
+//
+//    mpu6050_buf->error_flag = 0;
+//}
 
 void MPU6050_init(I2C_HandleTypeDef *i2c,
                   Struct_MPU6050 *mpu6050_buf)
 {
+    uint8_t val = 0;
+
     /* Clear all buffers */
     mpu6050_buf->acc_x = 0.0f;
     mpu6050_buf->acc_y = 0.0f;
@@ -35,63 +228,69 @@ void MPU6050_init(I2C_HandleTypeDef *i2c,
     mpu6050_buf->gyro_z_offset = 0.0f;
 
 
-    /* Check I2C communication / WHO_AM_I */
-    uint8_t val = 0;
+    /* ---------------------------------------------------------
+     * Check WHO_AM_I
+     * --------------------------------------------------------- */
 
     if (HAL_I2C_Mem_Read(i2c,
                          MPU6050_ADDR,
                          MPU6050_WHO_AM_I,
-						 I2C_MEMADD_SIZE_8BIT,
+                         I2C_MEMADD_SIZE_8BIT,
                          &val,
                          1,
-                         100) == HAL_OK)
+                         20) != HAL_OK)
     {
-        if (val != 0x68)
-        {
-            mpu6050_buf->error_flag = 1;
-            return;
-        }
+        mpu6050_buf->error_flag = 1;
+        return;
     }
-    else
+
+    if (val != 0x68)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
 
-    /* Power management
+    /* ---------------------------------------------------------
+     * Software reset
      *
-     * 0x88:
-     * - Temperature sensor disabled
-     * - Internal 8 MHz oscillator temporarily selected
-     */
-    val = 0x88;
+     * PWR_MGMT_1 bit 7 = DEVICE_RESET
+     * --------------------------------------------------------- */
+
+    val = 0x80;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_PWR_MGMT_1,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
-    HAL_Delay(10);
+    /* MPU needs time to complete internal reset */
+    HAL_Delay(100);
 
 
-    /* Select X-axis gyroscope PLL as clock source */
+    /* ---------------------------------------------------------
+     * Wake MPU6050
+     *
+     * CLKSEL = 001
+     * X-axis gyro PLL
+     * --------------------------------------------------------- */
+
     val = 0x01;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_PWR_MGMT_1,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
@@ -100,97 +299,90 @@ void MPU6050_init(I2C_HandleTypeDef *i2c,
     HAL_Delay(10);
 
 
-    /* Sample rate
+    /* ---------------------------------------------------------
+     * Sample rate
      *
-     * Gyroscope output rate = 1 kHz
-     *
-     * Sample Rate = 1000 / (1 + SMPLRT_DIV)
-     *
-     * SMPLRT_DIV = 9
-     *
-     * Sample rate = 100 Hz
-     */
+     * 1000 / (1 + 9) = 100 Hz
+     * --------------------------------------------------------- */
+
     val = 9;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_SMPRT_DIV,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
-    HAL_Delay(10);
+    HAL_Delay(2);
 
 
-    /* Digital Low Pass Filter
-     *
-     * CONFIG = 0x03
-     *
-     * Gyroscope bandwidth approximately 42 Hz
-     * Accelerometer bandwidth approximately 44 Hz
-     */
+    /* ---------------------------------------------------------
+     * Digital Low Pass Filter
+     * --------------------------------------------------------- */
+
     val = 0x03;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_CONFIG,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
-    HAL_Delay(10);
+    HAL_Delay(2);
 
 
-    /* Accelerometer full-scale configuration */
+    /* ---------------------------------------------------------
+     * Accelerometer full scale
+     * --------------------------------------------------------- */
+
     val = FS_SCALE_ACC;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_ACCEL_CONFIG,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
-    HAL_Delay(10);
+    HAL_Delay(2);
 
 
-    /* Gyroscope full-scale configuration */
+    /* ---------------------------------------------------------
+     * Gyroscope full scale
+     * --------------------------------------------------------- */
+
     val = FS_SCALE_GYRO;
 
     if (HAL_I2C_Mem_Write(i2c,
                           MPU6050_ADDR,
                           MPU6050_GYRO_CONFIG,
-                          1,
+                          I2C_MEMADD_SIZE_8BIT,
                           &val,
                           1,
-                          100) != HAL_OK)
+                          20) != HAL_OK)
     {
         mpu6050_buf->error_flag = 1;
         return;
     }
 
-    HAL_Delay(10);
-
-
-    /* No interrupt configuration required.
-     *
-     * MPU6050 INT pin can be left unconnected.
-     */
+    HAL_Delay(2);
 
 
     mpu6050_buf->error_flag = 0;
@@ -224,10 +416,10 @@ void MPU6050_GetData(I2C_HandleTypeDef *i2c,
     if (HAL_I2C_Mem_Read(i2c,
                          MPU6050_ADDR,
                          MPU6050_ACCEL_XOUT_H,
-                         1,
+                         I2C_MEMADD_SIZE_8BIT,
                          temp_data_buffer,
                          14,
-                         100) != HAL_OK)
+                         20) != HAL_OK)
     {
         mpu6050->error_flag = 1;
         return;
@@ -433,10 +625,10 @@ void MPU6050_Calibrate(I2C_HandleTypeDef *i2c,
         if (HAL_I2C_Mem_Read(i2c,
                              MPU6050_ADDR,
                              MPU6050_ACCEL_XOUT_H,
-                             1,
+                             I2C_MEMADD_SIZE_8BIT,
                              temp_buf,
                              14,
-                             100) == HAL_OK)
+                             20) == HAL_OK)
         {
             sum_ax +=
                 (int16_t)((temp_buf[0] << 8) |
@@ -450,7 +642,6 @@ void MPU6050_Calibrate(I2C_HandleTypeDef *i2c,
                 (int16_t)((temp_buf[4] << 8) |
                           temp_buf[5]);
 
-
             sum_gx +=
                 (int16_t)((temp_buf[8] << 8) |
                           temp_buf[9]);
@@ -463,8 +654,23 @@ void MPU6050_Calibrate(I2C_HandleTypeDef *i2c,
                 (int16_t)((temp_buf[12] << 8) |
                           temp_buf[13]);
 
-
             valid_samples++;
+
+            consecutive_failures = 0;
+        }
+        else
+        {
+            consecutive_failures++;
+
+            /*
+             * I2C is probably not working.
+             * Do not spend tens of seconds trying.
+             */
+            if (consecutive_failures >= 10)
+            {
+                mpu6050->error_flag = 1;
+                return;
+            }
         }
 
         HAL_Delay(2);

@@ -1,7 +1,7 @@
-../Core/Src/telemetry.c:49:10:CRC16	32	static
-../Core/Src/telemetry.c:71:6:GDM_Manager	8	static
-../Core/Src/telemetry.c:118:6:Parse_Data	16	static
-../Core/Src/telemetry.c:197:6:Heater_Control	8	static
-../Core/Src/telemetry.c:215:6:TX_Becon	80	static
-../Core/Src/telemetry.c:247:6:JPEG_Image_Transmit	184	static
-../Core/Src/telemetry.c:359:6:RX_Handler	80	static
+../Core/Src/telemetry.c:50:10:CRC16	32	static
+../Core/Src/telemetry.c:72:6:GDM_Manager	8	static
+../Core/Src/telemetry.c:121:6:Parse_Data	16	static
+../Core/Src/telemetry.c:200:6:Heater_Control	8	static
+../Core/Src/telemetry.c:223:6:TX_Becon	80	static
+../Core/Src/telemetry.c:255:6:JPEG_Image_Transmit	184	static
+../Core/Src/telemetry.c:367:6:RX_Handler	80	static

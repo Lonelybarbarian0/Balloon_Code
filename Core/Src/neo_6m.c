@@ -101,76 +101,123 @@ void Process_NMEA() {
             search_ptr++;
         }
 
-        gga_ptr = strstr((char *)GPS_PROC_BUF, "$GPGGA");
-        rmc_ptr = strstr((char *)GPS_PROC_BUF, "$GPRMC");
+//        gga_ptr = strstr((char *)GPS_PROC_BUF, "$GPGGA");
+//        rmc_ptr = strstr((char *)GPS_PROC_BUF, "$GPRMC");
 
         /* Process $GPGGA if present in the buffer */
-        if (gga_ptr != NULL) {
-            
-            field_ptr = get_nmea_field(gga_ptr, 1);
-            if (field_ptr) {
-                current_gps_data.time_pos = (uint32_t)(atof(field_ptr) * 1e2);
-            }
-
-            field_ptr = get_nmea_field(gga_ptr, 2);
-            if (field_ptr) {
-                double d_mm = atof(field_ptr) * 0.01;
-                int degrees = (int)d_mm;
-                current_gps_data.latitude = (degrees + ((d_mm - degrees) * 100.0 / 60.0)) * 1e6;
-            }
-            
-            field_ptr = get_nmea_field(gga_ptr, 3);
-            if (field_ptr && *field_ptr == 'S') {
-                current_gps_data.latitude = -current_gps_data.latitude;
-            }
-            
-            field_ptr = get_nmea_field(gga_ptr, 4);
-            if (field_ptr) {
-                double d_mm = atof(field_ptr) * 0.01;
-                int degrees = (int)d_mm;
-                current_gps_data.longitude = (degrees + ((d_mm - degrees) * 100.0 / 60.0)) * 1e6;
-            }
-            
-            field_ptr = get_nmea_field(gga_ptr, 5);
-            if (field_ptr && *field_ptr == 'W') {
-                current_gps_data.longitude = -current_gps_data.longitude;
-            }
-            
+        if (gga_ptr != NULL)
+        {
+            /* Fix quality */
             field_ptr = get_nmea_field(gga_ptr, 6);
-            if (field_ptr) {
+
+            if (field_ptr)
+            {
                 current_gps_data.fix_qual = atoi(field_ptr);
             }
-            
+
+            /* Number of satellites */
             field_ptr = get_nmea_field(gga_ptr, 7);
-            if (field_ptr) {
-            	current_gps_data.sats = atoi(field_ptr);
+
+            if (field_ptr)
+            {
+                current_gps_data.sats = atoi(field_ptr);
             }
 
+            /* HDOP */
             field_ptr = get_nmea_field(gga_ptr, 8);
-            if (field_ptr) {
-                current_gps_data.hdop = (uint16_t)(atof(field_ptr) * 1e2);
-            }
-            
-            field_ptr = get_nmea_field(gga_ptr, 9);
-            if (field_ptr) {
-                current_gps_data.altitude = (int)(atof(field_ptr) * 1e1);
+
+            if (field_ptr)
+            {
+                current_gps_data.hdop =
+                    (uint16_t)(atof(field_ptr) * 100.0);
             }
 
+            /*
+             * Only update position and altitude
+             * when GPS has a valid fix.
+             */
+            if (current_gps_data.fix_qual > 0)
+            {
+                /* Latitude */
+                field_ptr = get_nmea_field(gga_ptr, 2);
+
+                if (field_ptr && *field_ptr != '\0')
+                {
+                    double d_mm = atof(field_ptr) * 0.01;
+                    int degrees = (int)d_mm;
+
+                    current_gps_data.latitude =
+                        (degrees +
+                        ((d_mm - degrees) * 100.0 / 60.0)) * 1e6;
+                }
+
+                /* Latitude direction */
+                field_ptr = get_nmea_field(gga_ptr, 3);
+
+                if (field_ptr && *field_ptr == 'S')
+                {
+                    current_gps_data.latitude =
+                        -current_gps_data.latitude;
+                }
+
+                /* Longitude */
+                field_ptr = get_nmea_field(gga_ptr, 4);
+
+                if (field_ptr && *field_ptr != '\0')
+                {
+                    double d_mm = atof(field_ptr) * 0.01;
+                    int degrees = (int)d_mm;
+
+                    current_gps_data.longitude =
+                        (degrees +
+                        ((d_mm - degrees) * 100.0 / 60.0)) * 1e6;
+                }
+
+                /* Longitude direction */
+                field_ptr = get_nmea_field(gga_ptr, 5);
+
+                if (field_ptr && *field_ptr == 'W')
+                {
+                    current_gps_data.longitude =
+                        -current_gps_data.longitude;
+                }
+
+                /* Altitude */
+                field_ptr = get_nmea_field(gga_ptr, 9);
+
+                if (field_ptr && *field_ptr != '\0')
+                {
+                    current_gps_data.altitude =
+                        (int)(atof(field_ptr) * 10.0);
+                }
+            }
         }
 
         /* Process $GPRMC if present in the buffer */
-        if (rmc_ptr != NULL) {
-            
-            field_ptr = get_nmea_field(rmc_ptr, 7);
-            if (field_ptr) {
-                current_gps_data.speed = (int)(atof(field_ptr) * 51.44);
-            }
-            
-            field_ptr = get_nmea_field(rmc_ptr, 8);
-            if (field_ptr) {
-                current_gps_data.course = atoi(field_ptr);
-            }
+        if (rmc_ptr != NULL)
+        {
+            /* RMC status: A = valid, V = invalid */
+            field_ptr = get_nmea_field(rmc_ptr, 2);
 
+            if (field_ptr && *field_ptr == 'A')
+            {
+                /* Speed in knots -> m/s */
+                field_ptr = get_nmea_field(rmc_ptr, 7);
+
+                if (field_ptr)
+                {
+                    current_gps_data.speed =
+                        (uint8_t)(atof(field_ptr) * 0.5144);
+                }
+
+                /* Course */
+                field_ptr = get_nmea_field(rmc_ptr, 8);
+
+                if (field_ptr)
+                {
+                    current_gps_data.course = atoi(field_ptr);
+                }
+            }
         }
 
         gps_data_ready = 0;

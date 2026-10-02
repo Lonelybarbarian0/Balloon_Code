@@ -124,7 +124,6 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
-  MX_IWDG_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   uint8_t err = 0x00;
@@ -145,23 +144,24 @@ int main(void)
   /* Initialize MPU6050 */
   MPU6050_init(&hi2c1, &MPU_DATA);
 
-  if(MPU_DATA.error_flag == 1)
+  if (MPU_DATA.error_flag)
   {
-	  errr.mpu6050_error = 1;
+      errr.mpu6050_error = 1;
   }
-
-  /* Allow sensor to settle */
-  HAL_Delay(1000);
-
-  /*
-   * Keep MPU6050 completely stationary during calibration.
-   */
-  if(MPU_DATA.error_flag != 1)
-	  MPU6050_Calibrate(&hi2c1, &MPU_DATA, 500);
-
-  if(MPU_DATA.error_flag == 1)
+  else
   {
-	  errr.mpu6050_error = 1;
+      HAL_Delay(1000);
+
+      MPU6050_Calibrate(
+          &hi2c1,
+          &MPU_DATA,
+          500
+      );
+
+      if (MPU_DATA.error_flag)
+      {
+          errr.mpu6050_error = 1;
+      }
   }
 
   /* Clear any pending EXTI interrupts */
@@ -205,11 +205,14 @@ int main(void)
 	  }
 	  else errr.ms5611_error = 0;
 
-	  MPU6050_GetData(&hi2c1, &MPU_DATA);
-
-	  if(MPU_DATA.error_flag == 1)
+	  if (MPU_DATA.error_flag == 0)
 	  {
-		  errr.mpu6050_error = 1;
+	      MPU6050_GetData(&hi2c1, &MPU_DATA);
+
+	      if (MPU_DATA.error_flag == 1)
+	      {
+	          errr.mpu6050_error = 1;
+	      }
 	  }
 
 	  GDM_Manager();
